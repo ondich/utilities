@@ -1,5 +1,5 @@
 # utilities
-This repository if for the many miscellaneous small programs that I write for
+This repository is for the many miscellaneous small programs that I write for
 my own convenience. Sometimes they're reusable, sometimes I need them for a long
 time, and sometimes they're one-offs. But in any case, they usually contain techniques
 that I'll need again, so I keep them here as samples for myself.

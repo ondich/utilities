@@ -20,7 +20,7 @@ import os
 import subprocess
 import argparse
 
-DEBUG = False
+DEBUG = True
 
 # These hard-coded values are specific to the layout of my office, the positioning
 # of my webcam, the placement of my greenscreen on the wall behind me, etc.
@@ -56,6 +56,11 @@ def overlay_on_image(x, y, background_image, overlay_image, output_image):
     debug_print(command)
     os.system(command)
 
+def overlay_video_on_image(left, top, width, height, background_image, overlay_video, output_video):
+    command = f'ffmpeg -loop 1 -i {background_image} -vf "movie={overlay_video},scale={width}:{height}[inner];[in][inner]overlay={left}:{int(top)}:shortest=1[out]" -y {output_video}'
+    debug_print(command)
+    os.system(command)
+
 def scale_image(scale_percent, input_image, output_image):
     command = f'convert -scale {scale_percent}% "{input_image}" "{output_image}"'
     debug_print(command)
@@ -69,6 +74,11 @@ def resize_image(new_width, new_height, input_image, output_image):
 def image_size(input_image):
     result = subprocess.run(['identify', '-format', '%w %h', input_image], stdout=subprocess.PIPE).stdout.decode('utf-8')
     width, height = map(int, result.split())
+    return width, height
+
+def video_size(input_video):
+    result = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=s=x:p=0', input_video], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    width, height = map(int, result.split('x'))
     return width, height
 
 def make_caption_image(caption, width, height, background_color, text_color, font, output_image):
@@ -127,13 +137,13 @@ def greenscreen_overlay_rect_for_image(image_width, image_height, screen_width, 
         left = gs_left
         width = gs_width
         height = int(image_aspect_ratio * float(width))
-        top = gs_top + (gs_height - height) / 2
+        top = int(gs_top + (gs_height - height) / 2)
     else:
         debug_print('Using full height')
         height = gs_height
         top = gs_top
         width = int(float(height) / image_aspect_ratio)
-        left = gs_left + (gs_width - width) / 2
+        left = int(gs_left + (gs_width - width) / 2)
     return left, top, width, height
 
 def caption_to_greenscreen(args):
@@ -142,7 +152,7 @@ def caption_to_greenscreen(args):
     background_image = f'{output_base_name}-background.{output_extension}'
     caption_image = f'{output_base_name}-caption.{output_extension}'
     make_solid_color_image(CANVAS_WIDTH, CANVAS_HEIGHT, args.background, background_image)
-    gs_left, gs_top, gs_width, gs_height = fat_greenscreen_rect(CANVAS_WIDTH, CANVAS_HEIGHT)
+    gs_left, gs_top, gs_width, gs_height = greenscreen_rect(CANVAS_WIDTH, CANVAS_HEIGHT)
     make_caption_image(args.caption, gs_width, gs_height, args.background, args.textcolor, args.font, caption_image)
     overlay_on_image(gs_left, gs_top, background_image, caption_image, args.output_image)
     command = f'rm "{background_image}" "{caption_image}"'
@@ -161,6 +171,17 @@ def image_to_greenscreen(args):
     command = f'rm "{background_image}" "{resized_image}"'
     os.system(command)
 
+def video_to_greenscreen(args):
+    input_base_name = args.input_video[:args.input_video.rfind('.')]
+    input_extension = args.input_video[args.input_video.rfind('.') + 1:]
+    background_image = f'{input_base_name}-background.jpg'
+    make_canvas(args.background, background_image, True)
+    video_width, video_height = video_size(args.input_video)
+    left, top, width, height = greenscreen_overlay_rect_for_image(video_width, video_height, CANVAS_WIDTH, CANVAS_HEIGHT) 
+    overlay_video_on_image(left, top, width, height, background_image, args.input_video, args.output_video)
+    #command = f'rm "{background_image}" "{args.output_video}"'
+    #os.system(command)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version', version='1.0.0')
@@ -173,12 +194,18 @@ if __name__ == '__main__':
     image_parser.set_defaults(func=image_to_greenscreen)
 
     caption_parser = subparsers.add_parser('caption')
-    caption_parser.add_argument('caption', help='the text of the desired caption')
+    caption_parser.add_argument('caption', help='text of the desired caption')
     caption_parser.add_argument('output_image', help='name of the output image')
     caption_parser.add_argument('--background', default='black', help='background color')
     caption_parser.add_argument('--textcolor', default='white', help='text color')
     caption_parser.add_argument('--font', default='Helvetica', help='font')
     caption_parser.set_defaults(func=caption_to_greenscreen)
+
+    video_parser = subparsers.add_parser('video')
+    video_parser.add_argument('input_video', help='name of the input video')
+    video_parser.add_argument('output_video', help='name of the output video')
+    video_parser.add_argument('--background', default='black', help='background color')
+    video_parser.set_defaults(func=video_to_greenscreen)
 
     args = parser.parse_args()
     args.func(args)
