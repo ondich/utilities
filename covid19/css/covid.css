@@ -1,0 +1,59 @@
+select {
+    font-size: 16pt;
+}
+
+.covid-header {
+    padding: 20px;
+}
+
+.covid-chart {
+    display: inline-block;
+    border: 2px dashed gray;
+    width: 40%;
+    margin: 20px;
+    padding-bottom: 50px;
+/*    display: block;
+    width: 50%;
+    */
+}
+
+.covid-chart .ct-bar {
+    stroke: #11aa11;
+    fill: #11aa11;
+}
+
+.chart-title {
+    text-align: center;
+    width: 100%;
+    font-size: 36pt;
+}
+
+.state-select {
+    font-size: 28pt;
+}
+
+.ct-bar {
+    stroke-width: 4px;
+}
+
+.tooltip {
+    display: none;
+    background-color: #eee;
+    border: 1px solid black;
+    padding: 2px;
+}
+
+/* Fix x-axis labels. https://stackoverflow.com/questions/40762182/chartist-js-rotate-labels-on-x-axis/42666530 */
+svg.ct-chart-bar, svg.ct-chart-line{
+    overflow: visible;
+}
+
+.ct-label.ct-label.ct-horizontal.ct-end {
+    position: relative;
+    justify-content: flex-end;
+    text-align: right;
+    transform-origin: 100% 0;
+    transform: translate(-100%) rotate(-75deg);
+    white-space:nowrap;
+}
+

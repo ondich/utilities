@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>COVID-19 Stats</title>
+    <link rel="stylesheet" href="css/chartist.min.css">
+    <link rel="stylesheet" href="css/covid.css">
+</head>
+<body>
+    <div class="covid-header">
+        <select id="state-select"></select>
+        <div id="state-title"></div>
+    </div>
+    
+    <!-- Deaths -->
+    <div class="covid-chart state-deaths">
+        <div class="chart-title" id="state-deaths-title"></div>
+        <div class="ct-chart ct-perfect-fourth" id="state-deaths"></div>
+        <div id="state-deaths-tooltip" class="tooltip"> </div>
+    </div>
+
+    <!-- Positive tests -->
+    <div class="covid-chart state-positives">
+        <div class="chart-title" id="state-positives-title"></div>
+        <div class="ct-chart ct-perfect-fourth" id="state-positives"></div>
+        <div id="state-positives-tooltip" class="tooltip"> </div>
+    </div>
+
+    <!-- Hospitalized -->
+    <div class="covid-chart state-hospitalized">
+        <div class="chart-title" id="state-hospitalized-title"></div>
+        <div class="ct-chart ct-perfect-fourth" id="state-hospitalized"></div>
+        <div id="state-hospitalized-tooltip" class="tooltip"> </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/chartist.js"></script>
+    <script src="js/covid.js"></script>
+</body>
+</html>
+
